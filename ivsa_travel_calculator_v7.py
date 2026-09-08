@@ -285,7 +285,7 @@ with st.form("travel_calculator_form_v7"):
         col_dep2, col_dest2 = st.columns(2)
         with col_dep2:
             dep2 = st.selectbox("출발지 선택", options=LOCATIONS, index=0, key="dep_g2")
-        with col_dest2 = st.columns(1)[0] if False else col_dest2: # Dummy columns bypass
+        with col_dest2:
             dest2 = st.selectbox("도착지 선택", options=LOCATIONS, index=2, key="dest_g2")
             
         route_info2 = lookup_route(dep2, dest2)
