@@ -3,7 +3,7 @@ import os
 
 # 페이지 설정
 st.set_page_config(
-    page_title="IVSA 임원진 교통비 환급 계산기 (출도착지 선택형)",
+    page_title="IVSA 임원진 교통비 환급 계산기 (실시간 반응형)",
     page_icon="🏥",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -196,325 +196,321 @@ trip_pattern = st.radio(
 
 st.write("")
 
-# 폼 생성 및 요금 계산 로직 시작
-with st.form("travel_calculator_form_v7"):
-    
-    is_jeju_trip = False
-    
-    if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "편도 (외길 여정)":
-        st.subheader("📍 여정 경로 설정")
-        col_dep, col_dest = st.columns(2)
-        with col_dep:
-            dep = st.selectbox("출발지 선택", options=LOCATIONS, index=2, key="dep_single")
-        with col_dest:
-            dest = st.selectbox("도착지 선택", options=LOCATIONS, index=0, key="dest_single")
-            
-        route_info = lookup_route(dep, dest)
-        is_jeju_trip = route_info.get("is_jeju", False)
-        is_manual = route_info.get("is_manual", False)
-        
-        st.caption(f"💡 **선택 경로 정보:** {route_info['desc']}")
-        
-        if is_jeju_trip:
-            st.subheader("✈️ 제주대 항공편 정산 정보")
-            flight_fare = st.number_input(
-                "실제 비행기표 결제 총 금액 (왕복/편도 전체 결제액, 원)",
-                min_value=0,
-                value=120000 if trip_pattern == "왕복 (동일 경로 왕복)" else 60000,
-                step=1000,
-                key="flight_single"
-            )
-        else:
-            st.subheader("🚌 버스 요금 및 가산 요건")
-            fare1 = st.number_input(
-                "편도당 우등 버스 요금 (원)",
-                min_value=0,
-                value=route_info["fare"] if not is_manual else 13300,
-                step=100,
-                disabled=not is_manual,
-                key="fare_single"
-            )
-            
-            dur_options = [
-                "2시간 30분 미만 (추가금 없음)",
-                "2시간 30분 이상 ~ 3시간 30분 미만 (편도 +10,000원 가산)",
-                "3시간 30분 이상 (편도 +15,000원 가산)"
-            ]
-            
-            default_dur_idx = 0
-            if "3시간 30분 이상" in route_info["duration"]:
-                default_dur_idx = 2
-            elif "2시간 30분 이상" in route_info["duration"]:
-                default_dur_idx = 1
-                
-            duration_choice = st.selectbox(
-                "소요 시간 가산 기준",
-                options=dur_options,
-                index=default_dur_idx if not is_manual else 0,
-                disabled=not is_manual,
-                key="dur_single"
-            )
-            
-            # 왕복 여부
-            is_round = trip_pattern == "왕복 (동일 경로 왕복)"
-            
-            actual_spent = st.number_input(
-                "실제 교통비로 지출한 총 금액 (영수증 총합, 원)",
-                min_value=0,
-                value=int(fare1 * 2) if is_round else int(fare1),
-                step=100,
-                key="actual_single"
-            )
-            
-    else: # 가는 편과 오는 편의 경로가 다름
-        st.subheader("🛫 가는 편 경로 (Outbound)")
-        col_dep1, col_dest1 = st.columns(2)
-        with col_dep1:
-            dep1 = st.selectbox("출발지 선택", options=LOCATIONS, index=2, key="dep_g1")
-        with col_dest1:
-            dest1 = st.selectbox("도착지 선택", options=LOCATIONS, index=0, key="dest_g1")
-            
-        route_info1 = lookup_route(dep1, dest1)
-        is_jeju1 = route_info1.get("is_jeju", False)
-        is_manual1 = route_info1.get("is_manual", False)
-        
-        st.caption(f"가는 편 경로 정보: {route_info1['desc']}")
-        
-        st.write("---")
-        st.subheader("🛬 오는 편 경로 (Inbound)")
-        col_dep2, col_dest2 = st.columns(2)
-        with col_dep2:
-            dep2 = st.selectbox("출발지 선택", options=LOCATIONS, index=0, key="dep_g2")
-        with col_dest2:
-            dest2 = st.selectbox("도착지 선택", options=LOCATIONS, index=2, key="dest_g2")
-            
-        route_info2 = lookup_route(dep2, dest2)
-        is_jeju2 = route_info2.get("is_jeju", False)
-        is_manual2 = route_info2.get("is_manual", False)
-        
-        st.caption(f"오는 편 경로 정보: {route_info2['desc']}")
-        
-        is_jeju_trip = is_jeju1 or is_jeju2
-        
-        if is_jeju_trip:
-            st.subheader("✈️ 제주대 항공편 정산 정보")
-            flight_fare = st.number_input(
-                "실제 비행기표 결제 총 금액 (전체 결제액, 원)",
-                min_value=0,
-                value=120000,
-                step=1000,
-                key="flight_multi"
-            )
-        else:
-            st.subheader("🚌 버스 요금 및 가산 요건")
-            col_fare1, col_fare2 = st.columns(2)
-            with col_fare1:
-                fare1 = st.number_input(
-                    "가는 편 버스 요금 (원)",
-                    min_value=0,
-                    value=route_info1["fare"] if not is_manual1 else 13300,
-                    step=100,
-                    disabled=not is_manual1,
-                    key="fare_g1"
-                )
-            with col_fare2:
-                fare2 = st.number_input(
-                    "오는 편 버스 요금 (원)",
-                    min_value=0,
-                    value=route_info2["fare"] if not is_manual2 else 13300,
-                    step=100,
-                    disabled=not is_manual2,
-                    key="fare_g2"
-                )
-                
-            dur_options = [
-                "2시간 30분 미만 (추가금 없음)",
-                "2시간 30분 이상 ~ 3시간 30분 미만 (편도 +10,000원 가산)",
-                "3시간 30분 이상 (편도 +15,000원 가산)"
-            ]
-            
-            default_dur_idx1 = 0
-            if "3시간 30분 이상" in route_info1["duration"]:
-                default_dur_idx1 = 2
-            elif "2시간 30분 이상" in route_info1["duration"]:
-                default_dur_idx1 = 1
-                
-            default_dur_idx2 = 0
-            if "3시간 30분 이상" in route_info2["duration"]:
-                default_dur_idx2 = 2
-            elif "2시간 30분 이상" in route_info2["duration"]:
-                default_dur_idx2 = 1
-                
-            col_dur1, col_dur2 = st.columns(2)
-            with col_dur1:
-                duration_choice1 = st.selectbox(
-                    "가는 편 소요 시간 기준",
-                    options=dur_options,
-                    index=default_dur_idx1 if not is_manual1 else 0,
-                    disabled=not is_manual1,
-                    key="dur_g1"
-                )
-            with col_dur2:
-                duration_choice2 = st.selectbox(
-                    "오는 편 소요 시간 기준",
-                    options=dur_options,
-                    index=default_dur_idx2 if not is_manual2 else 0,
-                    disabled=not is_manual2,
-                    key="dur_g2"
-                )
-                
-            actual_spent = st.number_input(
-                "실제 교통비로 지출한 총 금액 (영수증 총합, 원)",
-                min_value=0,
-                value=int(fare1 + fare2),
-                step=100,
-                key="actual_multi"
-            )
-            
-    # 제출 버튼
-    submitted = st.form_submit_button("💰 환급 금액 계산하기")
+# 실시간 변경을 위해 st.form을 걷어내고 컴포넌트를 직접 배치합니다!
+is_jeju_trip = False
 
-# 계산 및 결과 화면 출력
-if submitted:
+if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "편도 (외길 여정)":
+    st.subheader("📍 여정 경로 설정")
+    col_dep, col_dest = st.columns(2)
+    with col_dep:
+        dep = st.selectbox("출발지 선택", options=LOCATIONS, index=2, key="dep_single")
+    with col_dest:
+        dest = st.selectbox("도착지 선택", options=LOCATIONS, index=0, key="dest_single")
+        
+    route_info = lookup_route(dep, dest)
+    is_jeju_trip = route_info.get("is_jeju", False)
+    is_manual = route_info.get("is_manual", False)
+    
+    st.caption(f"💡 **선택 경로 정보:** {route_info['desc']}")
+    
     if is_jeju_trip:
-        # 제주대 항공 환급액 로직
-        is_round_trip = True
-        if trip_pattern == "편도 (외길 여정)":
-            is_round_trip = False
-            
-        extra_fee = 30000 if is_round_trip else 15000
-        total_x = flight_fare + extra_fee
-        
-        is_capped = False
-        if total_x > 50000:
-            calculated_amount = (total_x - 50000) / 2 + 50000
-            is_capped = True
-        else:
-            calculated_amount = total_x
-            
-        final_refund = min(calculated_amount, flight_fare)
-        is_actual_spent_limit = calculated_amount > flight_fare
-        
-        # 결과 카드 출력
-        st.markdown("### 📊 계산 결과")
-        st.markdown(f"""
-            <div class="result-box">
-                <h4 style="margin:0; color:#0F52BA;">최종 환급 결정액 (제주대 항공편 전용)</h4>
-                <p style="font-size: 2rem; font-weight: bold; margin: 5px 0 0 0; color:#0A3D91;">
-                    {int(final_refund):,} 원
-                </p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("#### 🔍 세부 산출 과정")
-        st.markdown(f"""
-        * **✈️ 실제 비행기 요금 (기준액):** {flight_fare:,}원
-        * **🎁 제주대 항공 가산금:** {extra_fee:,}원 ({"왕복" if is_round_trip else "편도"} 적용)
-        * **규정 적용 전 기준 합계 ($X$):** **{total_x:,}원**
-        """)
-        
-        if is_capped:
-            st.markdown(f"⚠️ **5만원 초과 감액 적용:** 기준액이 50,000원을 초과하여 공식 `(X - 50,000) / 2 + 50,000`이 적용되었습니다. → **{int(calculated_amount):,}원**")
-        else:
-            st.markdown(f"✅ **5만원 이하 정상 적용:** 기준액이 50,000원 이하이므로 전액 인정됩니다. → **{int(calculated_amount):,}원**")
-            
-        if is_actual_spent_limit:
-            st.markdown(f"⚠️ **영수증 지출 한도 제한:** 계산된 환급액이 비행기표 실제 결제 금액({flight_fare:,}원)보다 크므로, 실제 지출금액 한도 내에서 환급됩니다.")
-            
+        st.subheader("✈️ 제주대 항공편 정산 정보")
+        flight_fare = st.number_input(
+            "실제 비행기표 결제 총 금액 (왕복/편도 전체 결제액, 원)",
+            min_value=0,
+            value=120000 if trip_pattern == "왕복 (동일 경로 왕복)" else 60000,
+            step=1000,
+            key="flight_single"
+        )
     else:
-        # 일반 버스 노선 정산 로직
-        if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "편도 (외길 여정)":
-            add1 = 0
-            if "3시간 30분 이상" in duration_choice:
-                add1 = 15000
-            elif "2시간 30분 이상" in duration_choice:
-                add1 = 10000
-                
-            is_round = trip_pattern == "왕복 (동일 경로 왕복)"
-            
-            # 기준액 계산
-            if is_round:
-                total_x = (fare1 + add1) * 2
-            else:
-                total_x = fare1 + add1
-                
-            total1 = fare1 + add1
-            total2 = fare1 + add1 if is_round else 0
-            add2 = add1 if is_round else 0
-            fare2 = fare1 if is_round else 0
-        else:
-            add1 = 0
-            if "3시간 30분 이상" in duration_choice1:
-                add1 = 15000
-            elif "2시간 30분 이상" in duration_choice1:
-                add1 = 10000
-                
-            add2 = 0
-            if "3시간 30분 이상" in duration_choice2:
-                add2 = 15000
-            elif "2시간 30분 이상" in duration_choice2:
-                add2 = 10000
-                
-            total1 = fare1 + add1
-            total2 = fare2 + add2
-            total_x = total1 + total2
-            
-        # 5만원 초과 규정 적용
-        is_capped = False
-        if total_x > 50000:
-            calculated_amount = (total_x - 50000) / 2 + 50000
-            is_capped = True
-        else:
-            calculated_amount = total_x
-            
-        # 실제 지출액 상한선 적용
-        final_refund = min(calculated_amount, actual_spent)
-        is_actual_spent_limit = calculated_amount > actual_spent
+        st.subheader("🚌 버스 요금 및 가산 요건")
+        fare1 = st.number_input(
+            "편도당 우등 버스 요금 (원)",
+            min_value=0,
+            value=route_info["fare"] if not is_manual else 13300,
+            step=100,
+            disabled=not is_manual,
+            key="fare_single"
+        )
         
-        # 결과 카드 출력
-        st.markdown("### 📊 계산 결과")
+        dur_options = [
+            "2시간 30분 미만 (추가금 없음)",
+            "2시간 30분 이상 ~ 3시간 30분 미만 (편도 +10,000원 가산)",
+            "3시간 30분 이상 (편도 +15,000원 가산)"
+        ]
+        
+        default_dur_idx = 0
+        if "3시간 30분 이상" in route_info["duration"]:
+            default_dur_idx = 2
+        elif "2시간 30분 이상" in route_info["duration"]:
+            default_dur_idx = 1
+            
+        duration_choice = st.selectbox(
+            "소요 시간 가산 기준",
+            options=dur_options,
+            index=default_dur_idx if not is_manual else 0,
+            disabled=not is_manual,
+            key="dur_single"
+        )
+        
+        # 왕복 여부
+        is_round = trip_pattern == "왕복 (동일 경로 왕복)"
+        
+        actual_spent = st.number_input(
+            "실제 교통비로 지출한 총 금액 (영수증 총합, 원)",
+            min_value=0,
+            value=int(fare1 * 2) if is_round else int(fare1),
+            step=100,
+            key="actual_single"
+        )
+        
+else: # 가는 편과 오는 편의 경로가 다름
+    st.subheader("🛫 가는 편 경로 (Outbound)")
+    col_dep1, col_dest1 = st.columns(2)
+    with col_dep1:
+        dep1 = st.selectbox("출발지 선택", options=LOCATIONS, index=2, key="dep_g1")
+    with col_dest1:
+        dest1 = st.selectbox("도착지 선택", options=LOCATIONS, index=0, key="dest_g1")
+        
+    route_info1 = lookup_route(dep1, dest1)
+    is_jeju1 = route_info1.get("is_jeju", False)
+    is_manual1 = route_info1.get("is_manual", False)
+    
+    st.caption(f"가는 편 경로 정보: {route_info1['desc']}")
+    
+    st.write("---")
+    st.subheader("🛬 오는 편 경로 (Inbound)")
+    col_dep2, col_dest2 = st.columns(2)
+    with col_dep2:
+        dep2 = st.selectbox("출발지 선택", options=LOCATIONS, index=0, key="dep_g2")
+    with col_dest2:
+        dest2 = st.selectbox("도착지 선택", options=LOCATIONS, index=2, key="dest_g2")
+        
+    route_info2 = lookup_route(dep2, dest2)
+    is_jeju2 = route_info2.get("is_jeju", False)
+    is_manual2 = route_info2.get("is_manual", False)
+    
+    st.caption(f"오는 편 경로 정보: {route_info2['desc']}")
+    
+    is_jeju_trip = is_jeju1 or is_jeju2
+    
+    if is_jeju_trip:
+        st.subheader("✈️ 제주대 항공편 정산 정보")
+        flight_fare = st.number_input(
+            "실제 비행기표 결제 총 금액 (전체 결제액, 원)",
+            min_value=0,
+            value=120000,
+            step=1000,
+            key="flight_multi"
+        )
+    else:
+        st.subheader("🚌 버스 요금 및 가산 요건")
+        col_fare1, col_fare2 = st.columns(2)
+        with col_fare1:
+            fare1 = st.number_input(
+                "가는 편 버스 요금 (원)",
+                min_value=0,
+                value=route_info1["fare"] if not is_manual1 else 13300,
+                step=100,
+                disabled=not is_manual1,
+                key="fare_g1"
+            )
+        with col_fare2:
+            fare2 = st.number_input(
+                "오는 편 버스 요금 (원)",
+                min_value=0,
+                value=route_info2["fare"] if not is_manual2 else 13300,
+                step=100,
+                disabled=not is_manual2,
+                key="fare_g2"
+            )
+            
+        dur_options = [
+            "2시간 30분 미만 (추가금 없음)",
+            "2시간 30분 이상 ~ 3시간 30분 미만 (편도 +10,000원 가산)",
+            "3시간 30분 이상 (편도 +15,000원 가산)"
+        ]
+        
+        default_dur_idx1 = 0
+        if "3시간 30분 이상" in route_info1["duration"]:
+            default_dur_idx1 = 2
+        elif "2시간 30분 이상" in route_info1["duration"]:
+            default_dur_idx1 = 1
+            
+        default_dur_idx2 = 0
+        if "3시간 30분 이상" in route_info2["duration"]:
+            default_dur_idx2 = 2
+        elif "2시간 30분 이상" in route_info2["duration"]:
+            default_dur_idx2 = 1
+            
+        col_dur1, col_dur2 = st.columns(2)
+        with col_dur1:
+            duration_choice1 = st.selectbox(
+                "가는 편 소요 시간 기준",
+                options=dur_options,
+                index=default_dur_idx1 if not is_manual1 else 0,
+                disabled=not is_manual1,
+                key="dur_g1"
+            )
+        with col_dur2:
+            duration_choice2 = st.selectbox(
+                "오는 편 소요 시간 기준",
+                options=dur_options,
+                index=default_dur_idx2 if not is_manual2 else 0,
+                disabled=not is_manual2,
+                key="dur_g2"
+            )
+            
+        actual_spent = st.number_input(
+            "실제 교통비로 지출한 총 금액 (영수증 총합, 원)",
+            min_value=0,
+            value=int(fare1 + fare2),
+            step=100,
+            key="actual_multi"
+        )
+
+# 실시간 즉시 계산을 적용하여 버튼 없이도 금액을 바로 보여줍니다!
+st.write("---")
+
+if is_jeju_trip:
+    # 제주대 항공 환급액 로직
+    is_round_trip = True
+    if trip_pattern == "편도 (외길 여정)":
+        is_round_trip = False
+        
+    extra_fee = 30000 if is_round_trip else 15000
+    total_x = flight_fare + extra_fee
+    
+    is_capped = False
+    if total_x > 50000:
+        calculated_amount = (total_x - 50000) / 2 + 50000
+        is_capped = True
+    else:
+        calculated_amount = total_x
+        
+    final_refund = min(calculated_amount, flight_fare)
+    is_actual_spent_limit = calculated_amount > flight_fare
+    
+    # 결과 카드 출력
+    st.markdown("### 📊 실시간 계산 결과")
+    st.markdown(f"""
+        <div class="result-box">
+            <h4 style="margin:0; color:#0F52BA;">최종 환급 결정액 (제주대 항공편 전용)</h4>
+            <p style="font-size: 2.2rem; font-weight: bold; margin: 5px 0 0 0; color:#0A3D91;">
+                {int(final_refund):,} 원
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("#### 🔍 세부 산출 과정")
+    st.markdown(f"""
+    * **✈️ 실제 비행기 요금 (기준액):** {flight_fare:,}원
+    * **🎁 제주대 항공 가산금:** {extra_fee:,}원 ({"왕복" if is_round_trip else "편도"} 적용)
+    * **규정 적용 전 기준 합계 ($X$):** **{total_x:,}원**
+    """)
+    
+    if is_capped:
+        st.markdown(f"⚠️ **5만원 초과 감액 적용:** 기준액이 50,000원을 초과하여 공식 `(X - 50,000) / 2 + 50,000`이 적용되었습니다. → **{int(calculated_amount):,}원**")
+    else:
+        st.markdown(f"✅ **5만원 이하 정상 적용:** 기준액이 50,000원 이하이므로 전액 인정됩니다. → **{int(calculated_amount):,}원**")
+        
+    if is_actual_spent_limit:
+        st.markdown(f"⚠️ **영수증 지출 한도 제한:** 계산된 환급액이 비행기표 실제 결제 금액({flight_fare:,}원)보다 크므로, 실제 지출금액 한도 내에서 환급됩니다.")
+        
+else:
+    # 일반 버스 노선 정산 로직
+    if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "편도 (외길 여정)":
+        add1 = 0
+        if "3시간 30분 이상" in duration_choice:
+            add1 = 15000
+        elif "2시간 30분 이상" in duration_choice:
+            add1 = 10000
+            
+        is_round = trip_pattern == "왕복 (동일 경로 왕복)"
+        
+        # 기준액 계산
+        if is_round:
+            total_x = (fare1 + add1) * 2
+        else:
+            total_x = fare1 + add1
+            
+        total1 = fare1 + add1
+        total2 = fare1 + add1 if is_round else 0
+        add2 = add1 if is_round else 0
+        fare2 = fare1 if is_round else 0
+    else:
+        add1 = 0
+        if "3시간 30분 이상" in duration_choice1:
+            add1 = 15000
+        elif "2시간 30분 이상" in duration_choice1:
+            add1 = 10000
+            
+        add2 = 0
+        if "3시간 30분 이상" in duration_choice2:
+            add2 = 15000
+        elif "2시간 30분 이상" in duration_choice2:
+            add2 = 10000
+            
+        total1 = fare1 + add1
+        total2 = fare2 + add2
+        total_x = total1 + total2
+        
+    # 5만원 초과 규정 적용
+    is_capped = False
+    if total_x > 50000:
+        calculated_amount = (total_x - 50000) / 2 + 50000
+        is_capped = True
+    else:
+        calculated_amount = total_x
+        
+    # 실제 지출액 상한선 적용
+    final_refund = min(calculated_amount, actual_spent)
+    is_actual_spent_limit = calculated_amount > actual_spent
+    
+    # 결과 카드 출력
+    st.markdown("### 📊 실시간 계산 결과")
+    st.markdown(f"""
+        <div class="result-box">
+            <h4 style="margin:0; color:#0F52BA;">최종 환급 결정액</h4>
+            <p style="font-size: 2.2rem; font-weight: bold; margin: 5px 0 0 0; color:#0A3D91;">
+                {int(final_refund):,} 원
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("#### 🔍 세부 산출 과정")
+    col1, col2 = st.columns(2)
+    with col1:
         st.markdown(f"""
-            <div class="result-box">
-                <h4 style="margin:0; color:#0F52BA;">최종 환급 결정액</h4>
-                <p style="font-size: 2rem; font-weight: bold; margin: 5px 0 0 0; color:#0A3D91;">
-                    {int(final_refund):,} 원
-                </p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("#### 🔍 세부 산출 과정")
-        col1, col2 = st.columns(2)
-        with col1:
+        **🛫 가는 편 기준액:**  
+        * 기본 요금: {fare1:,}원  
+        * 추가 가산금: {add1:,}원  
+        * **소계: {total1:,}원**
+        """)
+    with col2:
+        if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "가는 편과 오는 편의 경로가 다름":
             st.markdown(f"""
-            **🛫 가는 편 기준액:**  
-            * 기본 요금: {fare1:,}원  
-            * 추가 가산금: {add1:,}원  
-            * **소계: {total1:,}원**
+            **🛬 오는 편 기준액:**  
+            * 기본 요금: {fare2:,}원  
+            * 추가 가산금: {add2:,}원  
+            * **소계: {total2:,}원**
             """)
-        with col2:
-            if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "가는 편과 오는 편의 경로가 다름":
-                st.markdown(f"""
-                **🛬 오는 편 기준액:**  
-                * 기본 요금: {fare2:,}원  
-                * 추가 가산금: {add2:,}원  
-                * **소계: {total2:,}원**
-                """)
-            else:
-                st.markdown("""
-                **🛬 오는 편 기준액:**  
-                * (편도 정산이므로 기록 없음)
-                """)
-                
-        st.markdown(f"**규정 적용 전 기준 합계 ($X$):** {total_x:,}원")
+        else:
+            st.markdown("""
+            **🛬 오는 편 기준액:**  
+            * (편도 정산이므로 기록 없음)
+            """)
+            
+    st.markdown(f"**규정 적용 전 기준 합계 ($X$):** {total_x:,}원")
+    
+    if is_capped:
+        st.markdown(f"⚠️ **5만원 초과 감액 적용:** 기준액이 50,000원을 초과하여 공식 `(X - 50,000) / 2 + 50,000`이 적용되었습니다. → **{int(calculated_amount):,}원**")
+    else:
+        st.markdown(f"✅ **5만원 이하 정상 적용:** 기준액이 50,000원 이하이므로 전액 인정됩니다. → **{int(calculated_amount):,}원**")
         
-        if is_capped:
-            st.markdown(f"⚠️ **5만원 초과 감액 적용:** 기준액이 50,000원을 초과하여 공식 `(X - 50,000) / 2 + 50,000`이 적용되었습니다. → **{int(calculated_amount):,}원**")
-        else:
-            st.markdown(f"✅ **5만원 이하 정상 적용:** 기준액이 50,000원 이하이므로 전액 인정됩니다. → **{int(calculated_amount):,}원**")
-            
-        if is_actual_spent_limit:
-            st.markdown(f"⚠️ **영수증 지출 한도 제한:** 계산된 환급액이 실제 지출한 금액({actual_spent:,}원)보다 크므로, 실제 영수증 지출 금액까지만 환급됩니다.")
-        else:
-            st.markdown("✅ **영수증 한도 검증 완료:** 계산된 환급액이 실제 영수증 범위 내에 있으므로 전액 환급이 가능합니다.")
-            
-        st.info("💡 계산된 환급 금액은 규정 기준을 엄격하게 적용한 금액이며, 최종 지급을 위해서는 제출하신 버스 기준 요금 캡처 및 영수증 증빙이 일치해야 합니다.")
+    if is_actual_spent_limit:
+        st.markdown(f"⚠️ **영수증 지출 한도 제한:** 계산된 환급액이 실제 지출한 금액({actual_spent:,}원)보다 크므로, 실제 영수증 지출 금액까지만 환급됩니다.")
+    else:
+        st.markdown("✅ **영수증 한도 검증 완료:** 계산된 환급액이 실제 영수증 범위 내에 있으므로 전액 환급이 가능합니다.")
+        
+    st.info("💡 계산된 환급 금액은 규정 기준을 엄격하게 적용한 금액이며, 최종 지급을 위해서는 제출하신 버스 기준 요금 캡처 및 영수증 증빙이 일치해야 합니다.")
