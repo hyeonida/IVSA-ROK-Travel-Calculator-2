@@ -92,111 +92,92 @@ LOCATIONS = [
 ]
 
 # 사용자가 기획한 정확한 노선 데이터베이스 매트릭스 정의
-# (출발지, 도착지) 쌍에 매핑되는 요금 및 시간 규정
 ROUTES_DATABASE = {
-    # 춘천 <-> 서울경부 (회의장소 명칭을 행사장소 명칭과 매칭하기 위해 일원화)
     ("춘천 (강원대)", "서울경부 / 서울센트럴 (행사장소)"): {
         "fare": 10100,
         "duration": "2시간 30분 미만 (추가금 없음)",
         "desc": "춘천 ↔ 서울 일반/시외버스 기준 (소요시간 약 1시간 10분)"
     },
-    # 춘천 <-> 동서울
     ("춘천 (강원대)", "동서울 (행사장소)"): {
         "fare": 8600,
         "duration": "2시간 30분 미만 (추가금 없음)",
         "desc": "춘천 ↔ 동서울 일반/시외버스 기준 (소요시간 약 1시간 10분)"
     },
-    # 진주 <-> 서울경부
     ("진주 (경상대)", "서울경부 / 서울센트럴 (행사장소)"): {
         "fare": 34500,
         "duration": "3시간 30분 이상 (편도 +15,000원 가산)",
         "desc": "편도 소요시간 3시간 45분 적용"
     },
-    # 진주 <-> 동서울
     ("진주 (경상대)", "동서울 (행사장소)"): {
         "fare": 35900,
         "duration": "3시간 30분 이상 (편도 +15,000원 가산)",
         "desc": "편도 소요시간 3시간 55분 적용"
     },
-    # 광주 <-> 서울경부/센트럴
     ("광주유스퀘어 (전남대)", "서울경부 / 서울센트럴 (행사장소)"): {
         "fare": 30800,
         "duration": "2시간 30분 이상 - 3시간 30분 미만 (편도 +10,000원 가산)",
         "desc": "편도 소요시간 3시간 20분 적용"
     },
-    # 광주 <-> 동서울
     ("광주유스퀘어 (전남대)", "동서울 (행사장소)"): {
         "fare": 33300,
         "duration": "3시간 30분 이상 (편도 +15,000원 가산)",
         "desc": "편도 소요시간 3시간 30분 적용"
     },
-    # 대구 <-> 서울경부
     ("동대구터미널 (경북대)", "서울경부 / 서울센트럴 (행사장소)"): {
         "fare": 30000,
         "duration": "3시간 30분 이상 (편도 +15,000원 가산)",
         "desc": "편도 소요시간 3시간 30분 적용"
     },
-    # 대구 <-> 동서울
     ("동대구터미널 (경북대)", "동서울 (행사장소)"): {
         "fare": 30200,
         "duration": "3시간 30분 이상 (편도 +15,000원 가산)",
         "desc": "편도 소요시간 3시간 30분 적용"
     },
-    # 청주 <-> 서울경부
     ("청주 (충북대)", "서울경부 / 서울센트럴 (행사장소)"): {
         "fare": 13300,
         "duration": "2시간 30분 미만 (추가금 없음)",
         "desc": "편도 소요시간 1시간 30분 적용"
     },
-    # 청주 <-> 동서울
     ("청주 (충북대)", "동서울 (행사장소)"): {
         "fare": 13300,
         "duration": "2시간 30분 미만 (추가금 없음)",
         "desc": "편도 소요시간 1시간 30분 적용"
     },
-    # 세종 <-> 서울경부
     ("세종 (충북대)", "서울경부 / 서울센트럴 (행사장소)"): {
         "fare": 14400,
         "duration": "2시간 30분 미만 (추가금 없음)",
         "desc": "편도 소요시간 1시간 40분"
     },
-    # 세종 <-> 동서울
     ("세종 (충북대)", "동서울 (행사장소)"): {
         "fare": 16300,
         "duration": "2시간 30분 미만 (추가금 없음)",
         "desc": "편도 소요시간 2시간 10분"
     },
-    # 대전 <-> 서울센트럴
     ("대전 (충남대)", "서울경부 / 서울센트럴 (행사장소)"): {
         "fare": 16600,
         "duration": "2시간 30분 미만 (추가금 없음)",
         "desc": "편도 소요시간 2시간"
     },
-    # 대전 <-> 동서울
     ("대전 (충남대)", "동서울 (행사장소)"): {
         "fare": 18100,
         "duration": "2시간 30분 미만 (추가금 없음)",
         "desc": "편도 소요시간 2시간"
     },
-    # 유성 <-> 서울센트럴
     ("유성 (충남대)", "서울경부 / 서울센트럴 (행사장소)"): {
         "fare": 16900,
         "duration": "2시간 30분 미만 (추가금 없음)",
         "desc": "편도 소요시간 1시간 50분"
     },
-    # 유성 <-> 동서울
     ("유성 (충남대)", "동서울 (행사장소)"): {
         "fare": 17200,
         "duration": "2시간 30분 이상 - 3시간 30분 미만 (편도 +10,000원 가산)",
         "desc": "편도 소요시간 2시간 30분"
     },
-    # 익산 <-> 서울센트럴
     ("익산 (전북대)", "서울경부 / 서울센트럴 (행사장소)"): {
         "fare": 21500,
         "duration": "2시간 30분 이상 - 3시간 30분 미만 (편도 +10,000원 가산)",
         "desc": "편도 소요시간 2시간 40분"
     },
-    # 익산 <-> 동서울
     ("익산 (전북대)", "동서울 (행사장소)"): {
         "fare": 26000,
         "duration": "2시간 30분 이상 - 3시간 30분 미만 (편도 +10,000원 가산)",
@@ -209,11 +190,9 @@ def lookup_route(dep, dest):
     if dep == dest:
         return {"fare": 0, "duration": "2시간 30분 미만 (추가금 없음)", "desc": "출발지와 도착지가 같습니다."}
     
-    # 제주대 항공편 노선 여부
     if "제주공항" in dep or "제주공항" in dest:
         return {"fare": 0, "is_jeju": True, "duration": "제주대학교 학생 - 항공편 이용 (편도 +15,000원 가산)", "desc": "제주대 항공편 정산 대상 [1, 2]"}
     
-    # 직접 입력 여부
     if "기타" in dep or "기타" in dest:
         return {"fare": 0, "is_manual": True, "duration": "직접 선택", "desc": "요금과 소요시간을 직접 기입합니다."}
         
@@ -237,7 +216,6 @@ trip_pattern = st.radio(
 
 st.write("")
 
-# 실시간 변경을 위해 st.form을 사용하지 않고 컴포넌트 실시간 연동
 is_jeju_trip = False
 
 if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "편도 (외길 여정)":
@@ -261,7 +239,7 @@ if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "편도 (�
             min_value=0,
             value=120000 if trip_pattern == "왕복 (동일 경로 왕복)" else 60000,
             step=1000,
-            key="flight_single"
+            key=f"flight_single_{dep}_{dest}_{trip_pattern}"  # 동적 키 적용으로 리셋 활성화
         )
     else:
         st.subheader("🚌 버스 요금 및 가산 요건")
@@ -271,7 +249,7 @@ if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "편도 (�
             value=route_info["fare"] if not is_manual else 13300,
             step=100,
             disabled=not is_manual,
-            key="fare_single"
+            key=f"fare_single_{dep}_{dest}"  # 동적 키 적용하여 실시간 요금 변경 강제 적용 ⭐
         )
         
         dur_options = [
@@ -291,10 +269,9 @@ if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "편도 (�
             options=dur_options,
             index=default_dur_idx if not is_manual else 0,
             disabled=not is_manual,
-            key="dur_single"
+            key=f"dur_single_{dep}_{dest}"  # 동적 키 적용하여 실시간 가산금 옵션 스위칭 ⭐
         )
         
-        # 왕복 여부
         is_round = trip_pattern == "왕복 (동일 경로 왕복)"
         
         actual_spent = st.number_input(
@@ -302,7 +279,7 @@ if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "편도 (�
             min_value=0,
             value=int(fare1 * 2) if is_round else int(fare1),
             step=100,
-            key="actual_single"
+            key=f"actual_single_{dep}_{dest}_{trip_pattern}"  # 동적 키 적용하여 실시간 총합 동기화 ⭐
         )
         
 else: # 가는 편과 오는 편의 경로가 다름
@@ -342,7 +319,7 @@ else: # 가는 편과 오는 편의 경로가 다름
             min_value=0,
             value=120000,
             step=1000,
-            key="flight_multi"
+            key=f"flight_multi_{dep1}_{dest1}_{dep2}_{dest2}"
         )
     else:
         st.subheader("🚌 버스 요금 및 가산 요건")
@@ -354,7 +331,7 @@ else: # 가는 편과 오는 편의 경로가 다름
                 value=route_info1["fare"] if not is_manual1 else 13300,
                 step=100,
                 disabled=not is_manual1,
-                key="fare_g1"
+                key=f"fare_g1_{dep1}_{dest1}"  # 동적 키 적용 ⭐
             )
         with col_fare2:
             fare2 = st.number_input(
@@ -363,7 +340,7 @@ else: # 가는 편과 오는 편의 경로가 다름
                 value=route_info2["fare"] if not is_manual2 else 13300,
                 step=100,
                 disabled=not is_manual2,
-                key="fare_g2"
+                key=f"fare_g2_{dep2}_{dest2}"  # 동적 키 적용 ⭐
             )
             
         dur_options = [
@@ -391,7 +368,7 @@ else: # 가는 편과 오는 편의 경로가 다름
                 options=dur_options,
                 index=default_dur_idx1 if not is_manual1 else 0,
                 disabled=not is_manual1,
-                key="dur_g1"
+                key=f"dur_g1_{dep1}_{dest1}"  # 동적 키 적용 ⭐
             )
         with col_dur2:
             duration_choice2 = st.selectbox(
@@ -399,7 +376,7 @@ else: # 가는 편과 오는 편의 경로가 다름
                 options=dur_options,
                 index=default_dur_idx2 if not is_manual2 else 0,
                 disabled=not is_manual2,
-                key="dur_g2"
+                key=f"dur_g2_{dep2}_{dest2}"  # 동적 키 적용 ⭐
             )
             
         actual_spent = st.number_input(
@@ -407,14 +384,13 @@ else: # 가는 편과 오는 편의 경로가 다름
             min_value=0,
             value=int(fare1 + fare2),
             step=100,
-            key="actual_multi"
+            key=f"actual_multi_{dep1}_{dest1}_{dep2}_{dest2}"  # 동적 키 적용 ⭐
         )
 
-# 실시간 즉시 계산 결과 영역 출력
+# 실시간 계산 결과 영역 출력
 st.write("---")
 
 if is_jeju_trip:
-    # 제주대 항공 환급액 로직
     is_round_trip = True
     if trip_pattern == "편도 (외길 여정)":
         is_round_trip = False
@@ -432,7 +408,6 @@ if is_jeju_trip:
     final_refund = min(calculated_amount, flight_fare)
     is_actual_spent_limit = calculated_amount > flight_fare
     
-    # 결과 카드 출력
     st.markdown("### 📊 실시간 계산 결과")
     st.markdown(f"""
         <div class="result-box">
@@ -459,7 +434,6 @@ if is_jeju_trip:
         st.markdown(f"⚠️ **영수증 지출 한도 제한:** 계산된 환급액이 비행기표 실제 결제 금액({flight_fare:,}원)보다 크므로, 실제 지출금액 한도 내에서 환급됩니다.")
         
 else:
-    # 일반 버스 노선 정산 로직
     if trip_pattern == "왕복 (동일 경로 왕복)" or trip_pattern == "편도 (외길 여정)":
         add1 = 0
         if "3시간 30분 이상" in duration_choice:
@@ -469,7 +443,6 @@ else:
             
         is_round = trip_pattern == "왕복 (동일 경로 왕복)"
         
-        # 기준액 계산
         if is_round:
             total_x = (fare1 + add1) * 2
         else:
@@ -496,7 +469,6 @@ else:
         total2 = fare2 + add2
         total_x = total1 + total2
         
-    # 5만원 초과 규정 적용
     is_capped = False
     if total_x > 50000:
         calculated_amount = (total_x - 50000) / 2 + 50000
@@ -504,11 +476,9 @@ else:
     else:
         calculated_amount = total_x
         
-    # 실제 지출액 상한선 적용
     final_refund = min(calculated_amount, actual_spent)
     is_actual_spent_limit = calculated_amount > actual_spent
     
-    # 결과 카드 출력
     st.markdown("### 📊 실시간 계산 결과")
     st.markdown(f"""
         <div class="result-box">
