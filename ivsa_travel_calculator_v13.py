@@ -3,7 +3,7 @@ import os
 
 # 페이지 설정
 st.set_page_config(
-    page_title="IVSA 임원진 교통비 환급 계산기 (v14 - 에러 수정 및 정산 지원)",
+    page_title="IVSA 임원진 교통비 환급 계산기",
     page_icon="💳",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -245,7 +245,7 @@ else: # 복합 여정 (가는 편 / 오는 편 다름)
         fare1 = flight_fare1
         add1 = 15000
         actual_spent1 = flight_fare1
-        st.caption("✈️ 항공 가산금 +15,000원 자동 반영")
+        st.caption("✈️ 항공 추가금 +15,000원 자동 반영")
     else:
         with col_dep1:
             dep1 = st.selectbox("가는 편 출발지", options=LOCATIONS, index=2, key="dep1_m")
@@ -286,7 +286,7 @@ else: # 복합 여정 (가는 편 / 오는 편 다름)
         fare2 = flight_fare2
         add2 = 15000
         actual_spent2 = flight_fare2
-        st.caption("✈️ 항공 가산금 +15,000원 자동 반영")
+        st.caption("✈️ 항공 추가금 +15,000원 자동 반영")
     else:
         with col_dep2:
             dep2 = st.selectbox("오는 편 출발지", options=LOCATIONS, index=0, key="dep2_m")
@@ -388,7 +388,7 @@ else:
     st.markdown(f"✅ **5만원 이하 정상 적용:** 기준액이 50,000원 이하이므로 전액 인정됩니다. → **{int(calculated_amount):,}원**")
 
 if flight_bonus_total > 0:
-    st.info(f"✈️ **항공 가산금 혜택 반영:** 비행기 이용 가산금(+{flight_bonus_total:,}원)이 적용되었습니다.")
+    st.info(f"✈️ **항공 가산금 혜택 반영:** 비행기 이용 추가금(+{flight_bonus_total:,}원)이 적용되었습니다.")
 
 if is_actual_spent_limit:
     st.markdown(f"⚠️ **영수증 지출 한도 제한:** 계산 금액이 인정 상한선({max_allowed_cap:,}원)을 초과하여 최대 상한 금액까지만 환급 결정되었습니다.")
