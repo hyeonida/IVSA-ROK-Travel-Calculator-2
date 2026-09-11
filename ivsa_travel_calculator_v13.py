@@ -4,7 +4,7 @@ import os
 # 페이지 설정
 st.set_page_config(
     page_title="IVSA 임원진 교통비 환급 계산기 (v14 - 에러 수정 및 정산 지원)",
-    page_icon="🏥",
+    page_icon="💳",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
@@ -46,7 +46,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🏥 IVSA 임원진 교통비 환급 계산기")
+st.title("💳 IVSA 임원진 교통비 환급 계산기")
 st.write("본인의 **출발지/도착지 및 이동수단(버스, 기차, 비행기)**을 선택하면 규정에 맞춰 가산금 및 초과 감액이 자동으로 통합 산출됩니다.")
 
 # 맵 이미지 표시
@@ -59,15 +59,14 @@ elif os.path.exists("/workspace/artifacts/ivsa_travel_map_v2.png"):
 # 핵심 규정 안내
 with st.expander("📌 IVSA 교통비 환급 핵심 규정 요약 (항공/기차 포함)"):
     st.markdown("""
-    * **기본 원칙:** 실제 이용 교통수단(KTX, 비행기 등)과 관계없이 **도시 간 우등 고속버스 요금**을 기준으로 지급합니다. [2]
+    * **기본 원칙:** 실제 이용 교통수단(KTX, 비행기 등)과 관계없이 **도시 간 우등 고속버스 요금**을 기준으로 지급합니다.
     * **소요 시간 가산금 (편도당):**
-        * 편도 소요 시간 **2시간 30분 이상 ~ 3시간 30분 미만**: 편도 요금 +10,000원 추가 [2]
-        * 편도 소요 시간 **3시간 30분 이상**: 편도 요금 +15,000원 추가 [2]
+        * 편도 소요 시간 **2시간 30분 이상 ~ 3시간 30분 미만**: 편도 요금 +10,000원 추가
+        * 편도 소요 시간 **3시간 30분 이상**: 편도 요금 +15,000원 추가
     * **항공편(비행기) 가산금 및 한도 특례:**
-        * 비행기 이용 시 소요 시간과 관계없이 **편도당 +15,000원**의 가산금이 부여됩니다. [2]
-        * 비행기 이용자는 가산금(+15,000원)을 지원받을 수 있도록 영수증 한도 제한 시 **비행기 가산금만큼 상한선이 확대 적용**됩니다.
+        * 비행기 이용 시 소요 시간과 관계없이 **편도당 +15,000원**의 가산금이 부여됩니다.
     * **5만원 초과 감액 공식:**
-        * 총 기준액($X$)이 50,000원을 초과할 경우: $(X - 50,000) / 2 + 50,000$ [2]
+        * 총 기준액($X$)이 50,000원을 초과할 경우: $(X - 50,000) / 2 + 50,000$
     """)
 
 st.write("---")
@@ -130,7 +129,7 @@ def lookup_bus_route(dep, dest):
 # 여정 유형 선택
 trip_pattern = st.radio(
     "🧭 여정 유형을 선택해 주세요",
-    options=["왕복 (동일 경로 왕복)", "편도 (외길 여정)", "가는 편과 오는 편의 경로/수단이 다름 (복합 여정)"],
+    options=["왕복", "편도", "가는 편과 오는 편의 경로/수단이 다름 (복합)"],
     index=0,
     horizontal=True,
     key="trip_pattern_v13"
@@ -138,7 +137,7 @@ trip_pattern = st.radio(
 
 st.write("")
 
-if trip_pattern in ["왕복 (동일 경로 왕복)", "편도 (외길 여정)"]:
+if trip_pattern in ["왕복", "편도"]:
     st.subheader("📍 여정 경로 및 이동 수단 설정")
     
     col_mode, col_blank = st.columns([1, 1])
@@ -151,7 +150,7 @@ if trip_pattern in ["왕복 (동일 경로 왕복)", "편도 (외길 여정)"]:
         )
         
     if trans_mode == "비행기 (항공편)":
-        st.info("✈️ **항공편 특례 적용:** 비행기 결제 금액에 편도당 15,000원의 항공 가산금이 추가되며, 가산금 수령이 가능하도록 상한선이 자동 조정됩니다.")
+        st.info("✈️ **항공편 특례 적용:** 비행기 결제 금액에 편도당 15,000원이 추가됩니다")
         
         is_round = (trip_pattern == "왕복 (동일 경로 왕복)")
         flight_fare = st.number_input(
@@ -236,7 +235,7 @@ if trip_pattern in ["왕복 (동일 경로 왕복)", "편도 (외길 여정)"]:
         mode1, mode2 = "버스/기차", "버스/기차" if is_round else "None"
 
 else: # 복합 여정 (가는 편 / 오는 편 다름)
-    st.subheader("🛫 가는 편 경로 및 이동 수단 (Outbound)")
+    st.subheader("🛫 가는 편 경로 및 이동 수단")
     col_mode1, col_dep1, col_dest1 = st.columns([1.2, 1, 1])
     with col_mode1:
         mode1 = st.selectbox("가는 편 수단", options=["고속버스 / 기차", "비행기 (항공편)"], index=0, key="mode1_multi")
@@ -389,7 +388,7 @@ else:
     st.markdown(f"✅ **5만원 이하 정상 적용:** 기준액이 50,000원 이하이므로 전액 인정됩니다. → **{int(calculated_amount):,}원**")
 
 if flight_bonus_total > 0:
-    st.info(f"✈️ **항공 가산금 혜택 반영:** 비행기 이용 가산금(+{flight_bonus_total:,}원)이 인정되어 실제 지출액 범위 이상으로 환급 혜택이 정상 유지됩니다.")
+    st.info(f"✈️ **항공 가산금 혜택 반영:** 비행기 이용 가산금(+{flight_bonus_total:,}원)이 적용되었습니다.")
 
 if is_actual_spent_limit:
     st.markdown(f"⚠️ **영수증 지출 한도 제한:** 계산 금액이 인정 상한선({max_allowed_cap:,}원)을 초과하여 최대 상한 금액까지만 환급 결정되었습니다.")
