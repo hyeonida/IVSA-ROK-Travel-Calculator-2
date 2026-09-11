@@ -1,8 +1,9 @@
 import streamlit as st
+import os
 
 # 페이지 설정
 st.set_page_config(
-    page_title="IVSA 임원진 교통비 환급 계산기 (v13 - 항공+기차 복합 정산 지원)",
+    page_title="IVSA 임원진 교통비 환급 계산기 (v14 - 에러 수정 및 정산 지원)",
     page_icon="🏥",
     layout="centered",
     initial_sidebar_state="collapsed"
