@@ -152,7 +152,7 @@ if trip_pattern in ["왕복", "편도"]:
     if trans_mode == "비행기 (항공편)":
         st.info("✈️ **항공편 추가금 적용:** 비행기 결제 금액에 편도당 15,000원이 추가됩니다")
         
-        is_round = (trip_pattern == "왕복 (동일 경로 왕복)")
+        is_round = (trip_pattern == "왕복")
         flight_fare = st.number_input(
             "실제 비행기표 결제 총 금액 (영수증 결제액, 원)",
             min_value=0,
@@ -211,7 +211,7 @@ if trip_pattern in ["왕복", "편도"]:
             key=f"dur_s_{dep}_{dest}"
         )
         
-        is_round = (trip_pattern == "왕복 (동일 경로 왕복)")
+        is_round = (trip_pattern == "왕복")
         
         actual_spent_input = st.number_input(
             "실제 교통비로 지출한 총 금액 (영수증 총합, 원)",
@@ -366,7 +366,7 @@ with col1:
     * **소계: {fare1 + add1:,.0f}원**
     """)
 with col2:
-    if trip_pattern in ["왕복 (동일 경로 왕복)", "가는 편과 오는 편의 경로/수단이 다름 (복합 여정)"]:
+    if trip_pattern in ["왕복", "가는 편과 오는 편의 경로/수단이 다름 (복합)"]:
         st.markdown(f"""
         **🛬 오는 편 기준액:**  
         * 이용 수단: {mode2}  
